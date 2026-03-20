@@ -1,0 +1,484 @@
+/* ── Room Measure Wizard ─────────────────────────────────────────────────────
+   Mobile-first, full-screen wizard for guided room measurement.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Overlay */
+.rmw-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #0a0c18;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: #e0e4f0;
+  /* Prevent body scroll when open */
+  touch-action: pan-y;
+}
+
+/* ── Top bar ─────────────────────────────────────────────────────────────────*/
+.rmw-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: #13162b;
+  border-bottom: 1px solid #1e2340;
+  flex-shrink: 0;
+}
+
+.rmw-topbar__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #c9d1f5;
+}
+
+.rmw-topbar__step {
+  font-size: 0.72rem;
+  color: #5a6285;
+  background: #1e2136;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.rmw-close-btn {
+  background: none;
+  border: none;
+  color: #5a6285;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.rmw-close-btn:hover { color: #e53935; }
+
+/* ── Progress bar ────────────────────────────────────────────────────────────*/
+.rmw-progress {
+  height: 3px;
+  background: #1e2136;
+  flex-shrink: 0;
+}
+
+.rmw-progress__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3a4080, #7b8ef8);
+  transition: width 0.35s ease;
+}
+
+/* ── Scrollable body ─────────────────────────────────────────────────────────*/
+.rmw-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1.25rem 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.rmw-body::-webkit-scrollbar { width: 4px; }
+.rmw-body::-webkit-scrollbar-track { background: transparent; }
+.rmw-body::-webkit-scrollbar-thumb { background: #2e3250; border-radius: 4px; }
+
+/* ── Step header ─────────────────────────────────────────────────────────────*/
+.rmw-step-icon {
+  font-size: 2.8rem;
+  text-align: center;
+  line-height: 1;
+}
+
+.rmw-step-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #c9d1f5;
+  text-align: center;
+  margin: 0;
+}
+
+.rmw-step-sub {
+  font-size: 0.85rem;
+  color: #7a82aa;
+  text-align: center;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Camera capture ──────────────────────────────────────────────────────────*/
+.rmw-camera-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 2rem 1rem;
+  background: #13162b;
+  border: 2px dashed #3a4080;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #7a82aa;
+  font-size: 0.88rem;
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+}
+.rmw-camera-btn:hover,
+.rmw-camera-btn:active {
+  border-color: #5b63b8;
+  background: #1a1d2e;
+  color: #c9d1f5;
+}
+.rmw-camera-btn input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 100px; /* large hit area trick */
+}
+.rmw-camera-icon { font-size: 2.2rem; }
+
+/* Photo preview */
+.rmw-photo-preview {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  background: #13162b;
+  border: 1px solid #2e3250;
+}
+.rmw-photo-preview img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  display: block;
+}
+.rmw-photo-preview__retake {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background: rgba(13, 16, 26, 0.85);
+  border: 1px solid #3a4080;
+  border-radius: 6px;
+  color: #c9d1f5;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.65rem;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+
+/* ── Form fields ─────────────────────────────────────────────────────────────*/
+.rmw-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.rmw-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.rmw-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #8890b8;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.rmw-label-hint {
+  font-size: 0.72rem;
+  color: #5a6285;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-left: 0.3rem;
+}
+
+.rmw-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rmw-input {
+  flex: 1;
+  background: #1a1d2e;
+  border: 2px solid #2e3250;
+  border-radius: 10px;
+  color: #e0e4f0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  padding: 0.65rem 0.85rem;
+  outline: none;
+  transition: border-color 0.15s;
+  /* Large touch target for mobile */
+  min-height: 56px;
+  -webkit-appearance: none;
+}
+.rmw-input:focus { border-color: #5b63b8; }
+.rmw-input::placeholder { color: #3a4060; font-weight: 400; font-size: 1rem; }
+
+.rmw-unit {
+  font-size: 1rem;
+  color: #5a6285;
+  font-weight: 600;
+  min-width: 30px;
+}
+
+/* Grid for paired inputs */
+.rmw-input-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* ── Tip card ────────────────────────────────────────────────────────────────*/
+.rmw-tip {
+  background: #131a2e;
+  border: 1px solid #1e2f50;
+  border-left: 3px solid #5b63b8;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.8rem;
+  color: #8890b8;
+  line-height: 1.55;
+}
+.rmw-tip strong { color: #c9d1f5; }
+
+/* ── Object cards (windows, doors, radiators) ────────────────────────────────*/
+.rmw-objects {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.rmw-obj-card {
+  background: #13162b;
+  border: 1px solid #2e3250;
+  border-radius: 12px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rmw-obj-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rmw-obj-card__title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #c9d1f5;
+}
+
+.rmw-obj-card__del {
+  background: none;
+  border: 1px solid #3a2020;
+  border-radius: 6px;
+  color: #e53935;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.rmw-obj-card__del:hover { background: #2a1010; }
+
+/* ── Add object button ───────────────────────────────────────────────────────*/
+.rmw-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.85rem;
+  background: #1e2136;
+  border: 2px dashed #3a4080;
+  border-radius: 10px;
+  color: #7a82aa;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.rmw-add-btn:hover,
+.rmw-add-btn:active {
+  background: #252840;
+  border-color: #5b63b8;
+  color: #c9d1f5;
+}
+
+/* Skip link */
+.rmw-skip {
+  text-align: center;
+  font-size: 0.78rem;
+  color: #5a6285;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0.25rem 0;
+}
+.rmw-skip:hover { color: #8890b8; }
+
+/* ── Review section ──────────────────────────────────────────────────────────*/
+.rmw-review-section {
+  background: #13162b;
+  border: 1px solid #2e3250;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.rmw-review-section__header {
+  background: #1a1d2e;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #7a82aa;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.rmw-review-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.9rem;
+  border-top: 1px solid #1e2136;
+  font-size: 0.85rem;
+}
+
+.rmw-review-row__label { color: #7a82aa; }
+.rmw-review-row__val   { color: #c9d1f5; font-weight: 600; }
+
+.rmw-review-photo {
+  width: 100%;
+  max-height: 140px;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Bottom action bar ───────────────────────────────────────────────────────*/
+.rmw-footer {
+  flex-shrink: 0;
+  padding: 0.85rem 1rem;
+  background: #13162b;
+  border-top: 1px solid #1e2340;
+  display: flex;
+  gap: 0.65rem;
+}
+
+.rmw-btn {
+  flex: 1;
+  padding: 0.9rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s, transform 0.1s;
+  min-height: 52px;
+}
+.rmw-btn:active { transform: scale(0.98); }
+
+.rmw-btn--back {
+  background: #1e2136;
+  color: #7a82aa;
+  border: 1px solid #2e3250;
+  flex: 0 0 auto;
+  padding: 0.9rem 1.2rem;
+}
+.rmw-btn--back:hover { background: #252840; color: #c9d1f5; }
+
+.rmw-btn--next {
+  background: linear-gradient(135deg, #3a4080, #5b63b8);
+  color: #fff;
+}
+.rmw-btn--next:hover { opacity: 0.9; }
+
+.rmw-btn--generate {
+  background: linear-gradient(135deg, #e67e22, #d35400);
+  color: #fff;
+}
+.rmw-btn--generate:hover { opacity: 0.9; }
+
+/* ── Step 1 (welcome) specific ───────────────────────────────────────────────*/
+.rmw-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.rmw-feature-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: #13162b;
+  border: 1px solid #1e2340;
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+}
+
+.rmw-feature-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 0.05rem; }
+
+.rmw-feature-text { font-size: 0.82rem; color: #8890b8; line-height: 1.45; }
+.rmw-feature-text strong { display: block; color: #c9d1f5; margin-bottom: 0.15rem; }
+
+/* ── Wall selector ───────────────────────────────────────────────────────────*/
+.rmw-wall-pills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.rmw-wall-pill {
+  padding: 0.4rem 0.85rem;
+  border-radius: 20px;
+  background: #1e2136;
+  border: 1.5px solid #2e3250;
+  color: #7a82aa;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.rmw-wall-pill:hover { border-color: #5b63b8; color: #c9d1f5; }
+.rmw-wall-pill.active {
+  background: #3a4080;
+  border-color: #5b63b8;
+  color: #fff;
+}
+
+/* ── Success checkmark (final step) ─────────────────────────────────────────*/
+.rmw-success-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2e7d32, #43a047);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin: 0 auto;
+}
+
+/* ── Responsive tweaks for larger screens ────────────────────────────────────*/
+@media (min-width: 480px) {
+  .rmw-overlay {
+    max-width: 480px;
+    margin: 0 auto;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    box-shadow: 0 0 60px rgba(0,0,0,0.6);
+  }
+}
