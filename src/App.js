@@ -22,7 +22,14 @@ const TAB_STYLE = (active) => ({
 });
 
 export default function App() {
-  const [tab, setTab] = useState('heatloss');
+  const [tab, setTab]           = useState('heatloss');
+  const [radPrefill, setRadPrefill] = useState(null);
+
+  const handleSendToRadiator = ({ heatLoss, roomTemp, roomName }) => {
+    setRadPrefill({ heatLoss, roomTemp, roomName });
+    setTab('radiator');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div>
@@ -47,8 +54,8 @@ export default function App() {
         </button>
       </div>
 
-      {tab === 'heatloss'    && <HeatLossCalculator />}
-      {tab === 'radiator'    && <AxisRadiatorCalculator />}
+      {tab === 'heatloss'    && <HeatLossCalculator onSendToRadiator={handleSendToRadiator} />}
+      {tab === 'radiator'    && <AxisRadiatorCalculator prefillHeatLoss={radPrefill?.heatLoss} prefillRoomTemp={radPrefill?.roomTemp} prefillRoomName={radPrefill?.roomName} />}
       {tab === 'information' && <InformationPage />}
       {tab === 'cad'         && <CADPage />}
     </div>

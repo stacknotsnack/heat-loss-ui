@@ -100,7 +100,7 @@ function CalcSteps({ steps, correctionFactor, exponentN }) {
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export default function AxisRadiatorCalculator({ prefillHeatLoss, prefillRoomTemp }) {
+export default function AxisRadiatorCalculator({ prefillHeatLoss, prefillRoomTemp, prefillRoomName }) {
   const [heatLoss, setHeatLoss]     = useState(prefillHeatLoss || '');
   const [roomTemp, setRoomTemp]     = useState(prefillRoomTemp || 21);
   const [waterPart, setWaterPart]   = useState('L');
@@ -146,7 +146,12 @@ export default function AxisRadiatorCalculator({ prefillHeatLoss, prefillRoomTem
       <div className="ax-body">
         {/* ── Input Form ── */}
         <div className="ax-form-card">
-          <div className="ax-form-title">Radiator Selection Inputs</div>
+          <div className="ax-form-title">
+            Radiator Selection Inputs
+            {prefillRoomName && (
+              <span className="ax-prefill-badge">From Heat Loss: {prefillRoomName}</span>
+            )}
+          </div>
 
           <div className="ax-form-grid">
             {/* Heat Loss */}

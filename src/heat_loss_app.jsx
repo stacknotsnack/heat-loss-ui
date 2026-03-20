@@ -317,7 +317,7 @@ function HeatLossBar({ elements, ventilation, total }) {
 }
 
 /** Expandable room result card */
-function RoomResultCard({ roomResult, rankInfo, mode }) {
+function RoomResultCard({ roomResult, rankInfo, mode, onSendToRadiator }) {
   const [expanded, setExpanded] = useState(false);
   const tier = TIER_CONFIG[rankInfo?.tier || 'moderate'];
 
@@ -419,6 +419,20 @@ function RoomResultCard({ roomResult, rankInfo, mode }) {
               <span>Annual</span><strong>{formatCurrency(roomResult.costs.annualCostGBP)}</strong>
             </div>
           </div>
+
+          {/* Send to Radiator Selector */}
+          {onSendToRadiator && (
+            <button
+              className="hl-send-to-rad-btn"
+              onClick={() => onSendToRadiator({
+                heatLoss: roomResult.totals.totalHeatLossW,
+                roomTemp: roomResult.temperatures?.inside ?? 21,
+                roomName: roomResult.name,
+              })}
+            >
+              Find Radiator for This Room →
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -426,7 +440,7 @@ function RoomResultCard({ roomResult, rankInfo, mode }) {
 }
 
 /** Full results panel */
-function ResultsPanel({ result, mode }) {
+function ResultsPanel({ result, mode, onSendToRadiator }) {
   const rankMap = {};
   (result.ranking || []).forEach(r => { rankMap[r.roomId] = r; });
 
@@ -475,6 +489,7 @@ function ResultsPanel({ result, mode }) {
             roomResult={room}
             rankInfo={rankMap[room.roomId]}
             mode={mode}
+            onSendToRadiator={onSendToRadiator}
           />
         ))}
       </div>
@@ -508,7 +523,7 @@ function ResultsPanel({ result, mode }) {
 }
 
 // ─── Main App ─────────────────────────────────────────────────────────────────
-export default function HeatLossCalculator() {
+export default function HeatLossCalculator({ onSendToRadiator }) {
   const [mode, setMode] = useState('simplified');
   const [rooms, setRooms] = useState([{ ...JSON.parse(JSON.stringify(DEFAULT_ROOM)) }]);
   const [uValueData, setUValueData] = useState({});
@@ -691,7 +706,7 @@ export default function HeatLossCalculator() {
         </div>
 
         {/* ── Results ── */}
-        {result && <ResultsPanel result={result} mode={mode} />}
+        {result && <ResultsPanel result={result} mode={mode} onSendToRadiator={onSendToRadiator} />}
       </main>
 
       <footer className="hl-footer">
