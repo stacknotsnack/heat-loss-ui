@@ -104,6 +104,7 @@ export default function AxisRadiatorCalculator({ prefillHeatLoss, prefillRoomTem
   const [heatLoss, setHeatLoss]     = useState(prefillHeatLoss || '');
   const [roomTemp, setRoomTemp]     = useState(prefillRoomTemp || 21);
   const [waterPart, setWaterPart]   = useState('L');
+  const [maxLength, setMaxLength]   = useState('');
   const [result, setResult]         = useState(null);
   const [error, setError]           = useState('');
 
@@ -114,14 +115,15 @@ export default function AxisRadiatorCalculator({ prefillHeatLoss, prefillRoomTem
       const res = calculateRadiatorSelection(
         parseFloat(heatLoss),
         parseFloat(roomTemp),
-        waterPart
+        waterPart,
+        maxLength ? parseFloat(maxLength) : null
       );
       setResult(res);
       setTimeout(() => document.querySelector('.ax-results')?.scrollIntoView({ behavior: 'smooth' }), 100);
     } catch (err) {
       setError(err.message);
     }
-  }, [heatLoss, roomTemp, waterPart]);
+  }, [heatLoss, roomTemp, waterPart, maxLength]);
 
   const part = WATER_TEMP_PARTS[waterPart];
 
@@ -180,6 +182,25 @@ export default function AxisRadiatorCalculator({ prefillHeatLoss, prefillRoomTem
                 />
                 <span className="ax-input-unit">°C</span>
               </div>
+            </label>
+
+            {/* Max Wall Length */}
+            <label className="ax-label">
+              Max Wall Length (mm) <span className="ax-label-opt">optional</span>
+              <div className="ax-input-wrap">
+                <input
+                  type="number"
+                  className="ax-input"
+                  value={maxLength}
+                  min="300"
+                  max="3000"
+                  step="100"
+                  placeholder="e.g. 1200"
+                  onChange={e => setMaxLength(e.target.value)}
+                />
+                <span className="ax-input-unit">mm</span>
+              </div>
+              {maxLength && <span className="ax-input-sub">Only radiators ≤ {maxLength}mm wide shown</span>}
             </label>
 
             {/* Water Part */}
@@ -262,6 +283,23 @@ export default function AxisRadiatorCalculator({ prefillHeatLoss, prefillRoomTem
                 </div>
               </>
             )}
+
+            {/* Best per panel type */}
+            <div className="ax-section-title">
+              Best Fit by Panel Type
+              {result.inputs.maxLength && <span className="ax-section-sub"> — within {result.inputs.maxLength}mm wall length</span>}
+            </div>
+            <div className="ax-alternatives-grid">
+              {Object.entries(result.bestPerModel).map(([model, rad]) =>
+                rad ? (
+                  <RadiatorCard key={model} radiator={rad} heatLossW={result.inputs.heatLossW} />
+                ) : (
+                  <div key={model} className="ax-no-result-small">
+                    <strong>{model === 'PP' ? 'P+' : model}</strong> — no suitable size{result.inputs.maxLength ? ` within ${result.inputs.maxLength}mm` : ''}
+                  </div>
+                )
+              )}
+            </div>
 
             {/* Part L Summary */}
             <div className="ax-partl-box">

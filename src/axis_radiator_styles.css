@@ -546,6 +546,29 @@
   font-size: 0.9rem;
 }
 
+.ax-no-result-small {
+  background: var(--ax-fail-bg);
+  border: 1px solid var(--ax-fail-border);
+  color: var(--ax-fail);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+}
+
+.ax-label-opt {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--ax-muted);
+  margin-left: 0.35rem;
+}
+
+.ax-section-sub {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--ax-muted);
+  margin-left: 0.5rem;
+}
+
 /* ── Compliance Badge ───────────────────────────────────────── */
 .ax-badge {
   font-size: 0.72rem;

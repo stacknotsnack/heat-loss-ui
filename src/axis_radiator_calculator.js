@@ -150,7 +150,7 @@ export function correctedOutput(wattsAt50, cf) {
  * @param {string} waterPart   'L' | 'M' | 'X' | 'H'
  * @returns {object}           Full result with recommendation and alternatives
  */
-export function calculateRadiatorSelection(heatLossW, roomTempC, waterPart) {
+export function calculateRadiatorSelection(heatLossW, roomTempC, waterPart, maxLength = null) {
   if (!heatLossW || heatLossW <= 0)           throw new Error('Heat loss must be greater than 0W');
   if (roomTempC == null || roomTempC < 0 || roomTempC > 35) throw new Error('Room temperature must be 0–35°C');
   const part = WATER_TEMP_PARTS[waterPart];
@@ -163,8 +163,11 @@ export function calculateRadiatorSelection(heatLossW, roomTempC, waterPart) {
   const actualDT   = parseFloat((mwt - roomTempC).toFixed(2));
   const cf         = parseFloat(correctionFactor(mwt, roomTempC).toFixed(4));
 
+  // ── Filter by max wall length if provided ───────────────────────────────────
+  const database = maxLength ? RADIATOR_DATABASE.filter(r => r.length <= maxLength) : RADIATOR_DATABASE;
+
   // ── Score every radiator ────────────────────────────────────────────────────
-  const scored = RADIATOR_DATABASE.map(rad => {
+  const scored = database.map(rad => {
     const revised       = correctedOutput(rad.wattsAt50, cf);
     const revisedBTU    = Math.round(revised * 3.412);
     const deficit       = revised - heatLossW;
@@ -189,6 +192,15 @@ export function calculateRadiatorSelection(heatLossW, roomTempC, waterPart) {
   // ── Alternatives: next 3 candidates ────────────────────────────────────────
   const alternatives = candidates.slice(1, 4);
 
+  // ── Best per model type ──────────────────────────────────────────────────────
+  const bestPerModel = Object.keys(MODELS).reduce((acc, model) => {
+    const modelCandidates = scored
+      .filter(r => r.model === model && r.meetsLoad)
+      .sort((a, b) => a.revisedOutput - b.revisedOutput);
+    acc[model] = modelCandidates[0] || null;
+    return acc;
+  }, {});
+
   // ── Calculation steps for display ──────────────────────────────────────────
   const steps = [
     { label: 'Mean Water Temperature (MWT)',  formula: `(${flowTemp} + ${returnTemp}) ÷ 2`,                        result: `${mwt}°C` },
@@ -207,12 +219,13 @@ export function calculateRadiatorSelection(heatLossW, roomTempC, waterPart) {
   ].filter(Boolean);
 
   return {
-    inputs:      { heatLossW, heatLossBTU: Math.round(heatLossW * 3.412), roomTempC, waterPart },
+    inputs:      { heatLossW, heatLossBTU: Math.round(heatLossW * 3.412), roomTempC, waterPart, maxLength },
     waterTemps:  { part: waterPart, label: part.label, flowTemp, returnTemp, mwt, description: part.description },
     calculation: { actualDT, correctionFactor: cf, exponentN: EXPONENT_N, partLMaxOversizing: PART_L_MAX_OVERSIZING },
     steps,
     recommended,
     alternatives,
+    bestPerModel,
     allPassing:  passing.length,
     timestamp:   new Date().toISOString()
   };
