@@ -1,9 +1,11 @@
 import { supabase } from './supabase';
 
 export async function saveCalculation(name, rooms, result) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not signed in');
   const { data, error } = await supabase
     .from('calculations')
-    .insert({ name, rooms, result })
+    .insert({ name, rooms, result, user_id: user.id })
     .select()
     .single();
   if (error) throw error;
@@ -11,10 +13,13 @@ export async function saveCalculation(name, rooms, result) {
 }
 
 export async function updateCalculation(id, name, rooms, result) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not signed in');
   const { data, error } = await supabase
     .from('calculations')
     .update({ name, rooms, result, updated_at: new Date().toISOString() })
     .eq('id', id)
+    .eq('user_id', user.id)
     .select()
     .single();
   if (error) throw error;
