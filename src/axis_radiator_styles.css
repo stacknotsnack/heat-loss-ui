@@ -655,3 +655,17 @@
   .ax-header-formula    { display: none; }
   .ax-temp-preview      { gap: 0.4rem; }
 }
+
+/* ── Prefill badge ───────────────────────────────────────────── */
+.ax-prefill-badge {
+  display: inline-block;
+  margin-left: 0.75rem;
+  padding: 0.2rem 0.65rem;
+  background: rgba(230, 126, 34, 0.15);
+  border: 1px solid rgba(230, 126, 34, 0.4);
+  color: #e67e22;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  vertical-align: middle;
+}
