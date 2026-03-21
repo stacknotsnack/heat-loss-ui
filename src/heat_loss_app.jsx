@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { saveCalculation, updateCalculation } from './calculations';
 import './heat_loss_app.css';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -523,7 +524,7 @@ function ResultsPanel({ result, mode, onSendToRadiator }) {
 }
 
 // ─── Main App ─────────────────────────────────────────────────────────────────
-export default function HeatLossCalculator({ onSendToRadiator }) {
+export default function HeatLossCalculator({ onSendToRadiator, user, loadedCalc, onCalcLoaded }) {
   const [mode, setMode] = useState('simplified');
   const [rooms, setRooms] = useState([{ ...JSON.parse(JSON.stringify(DEFAULT_ROOM)) }]);
   const [uValueData, setUValueData] = useState({});
@@ -531,6 +532,9 @@ export default function HeatLossCalculator({ onSendToRadiator }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [apiStatus, setApiStatus] = useState('checking');
+  const [saveStatus, setSaveStatus] = useState(''); // 'saving' | 'saved' | 'error'
+  const [currentCalcId, setCurrentCalcId] = useState(null);
+  const [currentCalcName, setCurrentCalcName] = useState('');
 
   // Load U-value data and check API health
   useEffect(() => {
@@ -551,6 +555,38 @@ export default function HeatLossCalculator({ onSendToRadiator }) {
         setError('Could not load material database. Is the backend running?');
       });
   }, []);
+
+  // Load a saved calculation when passed from history
+  useEffect(() => {
+    if (loadedCalc) {
+      setRooms(loadedCalc.rooms);
+      setCurrentCalcId(loadedCalc.id);
+      setCurrentCalcName(loadedCalc.name);
+      setResult(null);
+      onCalcLoaded?.();
+    }
+  }, [loadedCalc]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSave = useCallback(async () => {
+    if (!user) return;
+    const name = currentCalcName || prompt('Name this calculation:', 'My Calculation');
+    if (!name) return;
+    setSaveStatus('saving');
+    try {
+      if (currentCalcId) {
+        await updateCalculation(currentCalcId, name, rooms, result);
+      } else {
+        const saved = await saveCalculation(name, rooms, result);
+        setCurrentCalcId(saved.id);
+      }
+      setCurrentCalcName(name);
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus(''), 2500);
+    } catch (e) {
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus(''), 3000);
+    }
+  }, [user, currentCalcId, currentCalcName, rooms, result]);
 
   const updateRoom = useCallback((index, updatedRoom) => {
     setRooms(prev => prev.map((r, i) => i === index ? updatedRoom : r));
@@ -693,6 +729,7 @@ export default function HeatLossCalculator({ onSendToRadiator }) {
         {/* ── Calculate Button ── */}
         <div className="hl-calculate-row">
           {error && <div className="hl-error-banner">{error}</div>}
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
           <button
             className={`hl-btn hl-btn--calculate ${mode === 'professional' ? 'hl-btn--pro' : ''}`}
             onClick={calculate}
@@ -703,6 +740,25 @@ export default function HeatLossCalculator({ onSendToRadiator }) {
               : <>🔥 Calculate Heat Loss {mode === 'professional' ? '(Professional)' : ''}</>
             }
           </button>
+          {user && result && (
+            <button
+              className="hl-btn hl-btn--save"
+              onClick={handleSave}
+              disabled={saveStatus === 'saving'}
+            >
+              {saveStatus === 'saving' ? '💾 Saving…'
+                : saveStatus === 'saved' ? '✓ Saved!'
+                : saveStatus === 'error' ? '✗ Save failed'
+                : currentCalcId ? '💾 Update Save'
+                : '💾 Save Calculation'}
+            </button>
+          )}
+          {currentCalcName && (
+            <span style={{ fontSize: '0.82rem', color: '#888' }}>
+              {currentCalcName}
+            </span>
+          )}
+          </div>
         </div>
 
         {/* ── Results ── */}

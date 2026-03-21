@@ -1083,3 +1083,19 @@ body {
 }
 .hl-send-to-rad-btn:hover  { opacity: 0.9; transform: translateY(-1px); }
 .hl-send-to-rad-btn:active { transform: translateY(0); }
+
+/* ── Save Button ─────────────────────────────────────────────── */
+.hl-btn--save {
+  background: linear-gradient(135deg, #27ae60, #1e8449);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+.hl-btn--save:hover    { opacity: 0.9; }
+.hl-btn--save:disabled { opacity: 0.6; cursor: not-allowed; }

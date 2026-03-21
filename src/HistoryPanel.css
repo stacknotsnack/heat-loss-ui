@@ -1,0 +1,143 @@
+.hist-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  z-index: 999;
+  padding: 1rem;
+}
+
+.hist-panel {
+  background: #1a1d2e;
+  border: 1px solid #2e3452;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 420px;
+  max-height: calc(100vh - 2rem);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+
+.hist-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #2e3452;
+}
+
+.hist-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.hist-close {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+.hist-close:hover { color: #fff; background: rgba(255,255,255,0.08); }
+
+.hist-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hist-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #0f111a;
+  border: 1px solid #2e3452;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.hist-item:hover { border-color: #e67e22; background: #12142a; }
+
+.hist-item-info { flex: 1; min-width: 0; }
+
+.hist-item-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hist-item-meta {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  color: #888;
+  flex-wrap: wrap;
+}
+
+.hist-item-watts {
+  color: #e67e22;
+  font-weight: 600;
+}
+
+.hist-item-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.hist-load-btn {
+  background: linear-gradient(135deg, #e67e22, #d35400);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.hist-load-btn:hover { opacity: 0.9; }
+
+.hist-del-btn {
+  background: rgba(231,76,60,0.1);
+  border: 1px solid rgba(231,76,60,0.3);
+  color: #e74c3c;
+  border-radius: 5px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.hist-del-btn:hover { background: rgba(231,76,60,0.2); }
+
+.hist-empty {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  color: #888;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.hist-error {
+  margin: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: rgba(231,76,60,0.15);
+  border: 1px solid rgba(231,76,60,0.4);
+  color: #e74c3c;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
